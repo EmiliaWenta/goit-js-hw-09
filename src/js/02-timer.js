@@ -1,7 +1,6 @@
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
-todayDate = new Date().getTime();
 const timerBox = document.querySelector('.timer');
 timerBox.style.display = 'flex';
 timerBox.style.gap = '15px';
@@ -26,7 +25,35 @@ const timerBoxFieldsArray = () => {
 };
 
 timerBoxFieldsArray();
+function convertMs(ms) {
+  // Number of milliseconds per unit of time
+  const second = 1000;
+  const minute = second * 60;
+  const hour = minute * 60;
+  const day = hour * 24;
 
+  // Remaining days
+  const days = Math.floor(ms / day);
+  // Remaining hours
+  const hours = Math.floor((ms % day) / hour);
+  // Remaining minutes
+  const minutes = Math.floor(((ms % day) % hour) / minute);
+  // Remaining seconds
+  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
+
+  return { days, hours, minutes, seconds };
+}
+
+function addLeadingZero(value) {
+  for (const key in value) {
+    if (value[key] < 10) {
+      value[key] = value[key].toString().padStart(2, '0');
+    } else {
+      continue;
+    }
+  }
+  return value;
+}
 const startBtn = document.querySelector('button');
 startBtn.setAttribute('disabled', 'disabled');
 
@@ -51,51 +78,27 @@ const options = {
 flatpickr('#datetime-picker', options);
 
 function generateTime() {
-  const ms = localStorage.getItem('chosedDate') - todayDate;
+  timrerId = setInterval(() => {
+    const chosedDate = localStorage.getItem('chosedDate');
+    const todayDate = new Date().getTime();
 
-  localStorage.setItem('convertMS', JSON.stringify(convertMs(ms)));
+    const ms = chosedDate - todayDate;
 
-  function convertMs(ms) {
-    // Number of milliseconds per unit of time
-    const second = 1000;
-    const minute = second * 60;
-    const hour = minute * 60;
-    const day = hour * 24;
+    localStorage.setItem('convertMS', JSON.stringify(convertMs(ms)));
 
-    // Remaining days
-    const days = Math.floor(ms / day);
-    // Remaining hours
-    const hours = Math.floor((ms % day) / hour);
-    // Remaining minutes
-    const minutes = Math.floor(((ms % day) % hour) / minute);
-    // Remaining seconds
-    const seconds = Math.floor((((ms % day) % hour) % minute) / second);
+    const value = JSON.parse(localStorage.getItem('convertMS'));
 
-    return { days, hours, minutes, seconds };
-  }
+    addLeadingZero(value);
 
-  const value = JSON.parse(localStorage.getItem('convertMS'));
+    const valueArray = Object.values(value);
 
-  function addLeadingZero(value) {
-    for (const key in value) {
-      if (value[key] < 10) {
-        value[key] = value[key].toString().padStart(2, '0');
-      } else {
-        continue;
-      }
+    for (let i = 0; i < spanWithValue.length; i++) {
+      spanWithValue[i].textContent = valueArray[i];
     }
-    return value;
-  }
-
-  addLeadingZero(value);
-
-  const valueArray = Object.values(value);
-
-  for (let i = 0; i < spanWithValue.length; i++) {
-    spanWithValue[i].textContent = valueArray[i];
-  }
+  }, 1000);
 }
 
-startBtn.addEventListener('click', () => {
-  timerId = setInterval(generateTime(), 1000);
+startBtn.addEventListener('click', event => {
+  event.stopPropagation();
+  generateTime();
 });
