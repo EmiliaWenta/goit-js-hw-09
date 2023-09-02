@@ -1,5 +1,6 @@
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 const timerBox = document.querySelector('.timer');
 timerBox.style.display = 'flex';
@@ -70,7 +71,7 @@ const options = {
       startBtn.removeAttribute('disabled');
     } else {
       startBtn.setAttribute('disabled', 'disabled');
-      alert('Please choose a date in the future');
+      Notify.failure('Please choose a date in the future');
     }
   },
 };
@@ -78,7 +79,7 @@ const options = {
 flatpickr('#datetime-picker', options);
 
 function generateTime() {
-  timrerId = setInterval(() => {
+  const timrerId = setInterval(() => {
     const chosedDate = localStorage.getItem('chosedDate');
     const todayDate = new Date().getTime();
 
@@ -96,6 +97,7 @@ function generateTime() {
       spanWithValue[i].textContent = valueArray[i];
     }
   }, 1000);
+  timrerId;
 }
 
 startBtn.addEventListener('click', event => {
